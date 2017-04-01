@@ -3,8 +3,8 @@
 ![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gameplay screenshot")
 
 ## :video_game:Controls:
-*Left mouse button* - left turn  
-*Right mouse button* - right turn
+*Left mouse button* - turn left  
+*Right mouse button* - turn right  
 
 ## :meat_on_bone:Food:
 *Green frog* - +1 point  
