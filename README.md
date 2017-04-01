@@ -2,16 +2,16 @@
 
 ![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gameplay screenshot")
 
-## Controls:
+## :video_game:Controls:
 *Left mouse button* - left turn  
 *Right mouse button* - right turn
 
-## Food:
+## :meat_on_bone:Food:
 *Green frog* - +1 point  
 *Red frog* - +2 points, -1 snake cell  
 *Blue frog* - game over
 
-## Launch parameters:
+## :bar_chart:Launch parameters:
 1. Number of X cells (default: 15)
 2. Number of Y cells (default: 15)
 3. Initial snake length (default: 3)
