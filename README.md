@@ -20,5 +20,7 @@
 6. Number of blue frogs (default: 4)
 7. Snake sleep time (ms) (default: 500)
 
-**Example:**
-`java -jar SnakeGame.jar 15 15 3 8 6 4 500`
+**Example:** `java -jar SnakeGame.jar 15 15 3 8 6 4 500`  
+
+* *Launch the game with no keys to use default values:* `java -jar SnakeGame.jar`  
+* *Use the "help" key to get information:* `java -jar SnakeGame.jar help`
