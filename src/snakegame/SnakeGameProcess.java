@@ -5,53 +5,103 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SnakeGameProcess implements Observer, Observable{
-    
+public class SnakeGameProcess implements Observer, Observable {
+
     private List<Observer> observers;
-    boolean play = false, gameOver = false;
-    Timer timer;
-    TimerTask snakeTimerTask, frogsTimerTask;
-     
-    public SnakeGameProcess(){
+    private boolean play, gameOver;
+    private int snakeSleepTime;
+    private Timer timer;
+    private TimerTask snakeTimerTask, greenFrogsTimerTask, redFrogsTimerTask, blueFrogsTimerTask;
+
+    public SnakeGameProcess(int snakeSleepTime) {
         observers = new LinkedList<>();
+        play = false;
+        gameOver = false;
+        this.snakeSleepTime = snakeSleepTime;
+        startGame();
+    }
+
+    /**
+     * Launches timers for snake and frogs.
+     *
+     * @see java.util.Timer
+     * @see java.util.TimerTask
+     */
+    private void startGame() {
         timer = new Timer();
+
         snakeTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if(play){
+                if (play & !gameOver) {
                     notifyObservers("MoveSnake");
                 }
             }
         };
-        timer.scheduleAtFixedRate(snakeTimerTask, 0, 500);
-        frogsTimerTask = new TimerTask() {
+        timer.scheduleAtFixedRate(snakeTimerTask, 0, snakeSleepTime);
+
+        greenFrogsTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if(play){
-                    notifyObservers("MoveFrogs");
+                if (play & !gameOver) {
+                    notifyObservers("MoveGreenFrogs");
                 }
             }
         };
-        timer.scheduleAtFixedRate(frogsTimerTask, 0, 1500);
+        timer.scheduleAtFixedRate(greenFrogsTimerTask, 0, snakeSleepTime * 5);
+
+        redFrogsTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (play & !gameOver) {
+                    notifyObservers("MoveRedFrogs");
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(redFrogsTimerTask, 0, snakeSleepTime * 4);
+
+        blueFrogsTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (play & !gameOver) {
+                    notifyObservers("MoveBlueFrogs");
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(blueFrogsTimerTask, 0, snakeSleepTime * 6);
     }
 
+    /**
+     * Updates the game process state depending on a message<br>
+     * received from the observable object.
+     *
+     * @param message
+     * @see SnakeGameWindow
+     */
     @Override
     public void update(String message) {
-        switch(message){
+        switch (message) {
             case "PlayPressed":
-                play = !play;
+                play = true;
+                break;
+            case "PausePressed":
+                play = false;
                 break;
             case "LeftMouseButtonPressed":
-                notifyObservers("TurnLeft");
+                notifyObservers("TurnSnakeLeft");
                 break;
             case "RightMouseButtonPressed":
-                notifyObservers("TurnRight");
+                notifyObservers("TurnSnakeRight");
                 break;
             case "GameOver":
+                play = false;
                 gameOver = true;
                 break;
+            case "StartNewGame":
+                gameOver = false;
+                notifyObservers("ResetGameBoard");
+                break;
             default:
-                notifyObservers(message);
                 break;
         }
     }
@@ -68,8 +118,9 @@ public class SnakeGameProcess implements Observer, Observable{
 
     @Override
     public void notifyObservers(String message) {
-        for (Observer observer : observers)
+        for (Observer observer : observers) {
             observer.update(message);
+        }
     }
-    
+
 }

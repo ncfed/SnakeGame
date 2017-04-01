@@ -1,47 +1,96 @@
 package snakegame;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
-public class Snake implements Observer, Observable {  
-    
-    private List<Observer> observers;
-    private ArrayList<Cell> snake = new ArrayList<Cell>();
+public class Snake {
+
+    private ArrayList<Cell> snake;
     private String direction;
-    private int x, y; //coordinates of cell
-    private int numberOfXCells, numberOfYCells, length;
-    
-    public Snake(int length, int numberOfXCells, int numberOfYCells){
-        observers = new LinkedList<>();
-        setGridSize(numberOfXCells, numberOfYCells);
-        this.length = length;
-        for(int i=0;i<length;i++){
-            snake.add(i, new Cell(length-i-1, 0));
-        }
-        setDirection("right");
-    } 
-    
-    public ArrayList<Cell> getSnake(){
-        return snake;
-    }
-    
-    public void addCell(){
-        //snake.add(length, new Cell(, ));
-    }
-    
-    private void setGridSize(int numberOfXCells, int numberOfYCells){
+    private int numberOfXCells, numberOfYCells, initialLength;
+    private int prevTailX, prevTailY; //coordinates of tail before movement
+    private boolean leftTurnAllowed, rightTurnAllowed; //needed to forbid the snake turn backwards
+
+    public Snake(int initialLength, int numberOfXCells, int numberOfYCells) {
         this.numberOfXCells = numberOfXCells;
         this.numberOfYCells = numberOfYCells;
+        this.initialLength = initialLength;
+        snake = new ArrayList<>();
+        for (int i = 0; i < initialLength; i++) {
+            snake.add(i, new Cell(initialLength - i - 1, 0));
+        }
+        setDirection("right");
+        leftTurnAllowed = true;
+        rightTurnAllowed = true;
     }
-    
-    private void setDirection(String direction){
+
+    /**
+     * Places the snake to start position.
+     */
+    public void reset() {
+        while (size() > initialLength) {
+            removeCell();
+        }
+        for (int i = 0; i < initialLength; i++) {
+            snake.get(i).setX(initialLength - i - 1);
+            snake.get(i).setY(0);
+        }
+        setDirection("right");
+        leftTurnAllowed = true;
+        rightTurnAllowed = true;
+    }
+
+    private void setDirection(String direction) {
         this.direction = direction;
     }
-    
+
+    public int size() {
+        return snake.size();
+    }
+
+    public int xOfCell(int index) {
+        return snake.get(index).getX();
+    }
+
+    public int yOfCell(int index) {
+        return snake.get(index).getY();
+    }
+
+    public void addCell() {
+        snake.add(snake.size(), new Cell(prevTailX, prevTailY));
+    }
+
+    public void removeCell() {
+        if (snake.size() > initialLength) {
+            snake.remove(snake.get(snake.size() - 1));
+        }
+    }
+
+    /**
+     * Checks if the snake has a cell with specified coordinates.<br>
+     * Used by frogs to avoid the cell where the snake is.
+     *
+     * @param x
+     * @param y
+     * @return <tt>true</tt> if the snake has a cell with specified coordinates.
+     * @see Frogs
+     */
+    public boolean hasCell(int x, int y) {
+        for (Cell cell : snake) {
+            if (cell.getX() == x & cell.getY() == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Moves the snake depending on its direction.
+     */
     public void move() {
-        x = snake.get(0).getX();
-        y = snake.get(0).getY();
+        prevTailX = snake.get(snake.size() - 1).getX();
+        prevTailY = snake.get(snake.size() - 1).getY();
+        int x = snake.get(0).getX();
+        int y = snake.get(0).getY();
         switch (direction) {
             case "up":
                 y--;
@@ -55,81 +104,73 @@ public class Snake implements Observer, Observable {
             case "left":
                 x--;
                 break;
-        }
-        if (x < 0 || x > numberOfXCells - 1 | y < 0 || y > numberOfYCells - 1) {
-            notifyObservers("BoundaryIsReached");
-        } else {
-            snake.remove(snake.size() - 1);
-            snake.add(0, new Cell(x, y));
-            notifyObservers("DrawSnake");
-        }
-    }
-    
-    public void turnLeft() {
-        switch (direction) {
-            case "up":
-                setDirection("left");
-                break;
-            case "right":
-                setDirection("up");
-                break;
-            case "down":
-                setDirection("right");
-                break;
-            case "left":
-                setDirection("down");
-                break;
-        }
-    }
-
-    public void turnRight(){
-         switch (direction) {
-            case "up":
-                setDirection("right");
-                break;
-            case "right":
-                setDirection("down");
-                break;
-            case "down":
-                setDirection("left");
-                break;
-            case "left":
-                setDirection("up");
-                break;
-        }
-    }
-
-    @Override
-    public void update(String message) {
-        switch(message){
-            case "MoveSnake":
-                move();
-                break;
-            case "TurnLeft":
-                turnLeft();
-                break;
-            case "TurnRight":
-                turnRight();
-                break;
             default:
-                addCell();
                 break;
         }
+        if (x < 0) {
+            x = numberOfXCells - 1;
+        } else if (x > numberOfXCells - 1) {
+            x = 0;
+        }
+        if (y < 0) {
+            y = numberOfYCells - 1;
+        } else if (y > numberOfYCells - 1) {
+            y = 0;
+        }
+        snake.remove(snake.size() - 1);
+        snake.add(0, new Cell(x, y));
+        leftTurnAllowed = true;
+        rightTurnAllowed = true;
     }
 
-    @Override
-    public void registerObserver(Observer o) {
-        observers.add(o);
+    /**
+     * Turns the snake left depending on its direction.
+     */
+    public void turnLeft() {
+        if (leftTurnAllowed) {
+            switch (direction) {
+                case "up":
+                    setDirection("left");
+                    break;
+                case "right":
+                    setDirection("up");
+                    break;
+                case "down":
+                    setDirection("right");
+                    break;
+                case "left":
+                    setDirection("down");
+                    break;
+                default:
+                    break;
+            }
+        }
+        leftTurnAllowed = false;
     }
 
-    @Override
-    public void removeObserver(Observer o) {
-        observers.remove(o);
+    /**
+     * Turns the snake right depending on its direction.
+     */
+    public void turnRight() {
+        if (rightTurnAllowed) {
+            switch (direction) {
+                case "up":
+                    setDirection("right");
+                    break;
+                case "right":
+                    setDirection("down");
+                    break;
+                case "down":
+                    setDirection("left");
+                    break;
+                case "left":
+                    setDirection("up");
+                    break;
+                default:
+                    break;
+            }
+        }
+        rightTurnAllowed = false;
     }
 
-    @Override
-    public void notifyObservers(String message) {
-        for (Observer observer : observers)
-            observer.update(message);
-    }
 }

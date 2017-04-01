@@ -3,128 +3,218 @@ package snakegame;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Observable {
 
     private List<Observer> observers;
-    int numOfXCells, numOfYCells, frogsEaten = 0;
-    int i, j, x, y; //drawing cycle counters and cell coordinates
-    ArrayList<Cell> snake, frogs;
-    Image offScrImg;
-    Graphics offScrGraph;
-    boolean playPressed = false;
-    Color gridColor = new Color(0, 153, 51, 100);
+    private boolean playPressed, stopPressed;
+    private int numOfXCells, numOfYCells, score;
+    private Frogs greenFrogs, redFrogs, blueFrogs;
+    private Snake snake;
+    private Color backgroundColor, gridColor;
+    private Image offScrImg;
+    private Graphics offScrGraph;
 
-    public SnakeGameWindow(int m, int n, ArrayList<Cell> snake, ArrayList<Cell> frogs) {
+    public SnakeGameWindow(int numOfXCells, int numOfYCells, Snake snake, Frogs greenFrogs, Frogs redFrogs, Frogs blueFrogs) {
         initComponents();
         observers = new LinkedList<>();
-        numOfXCells = m;
-        numOfYCells = n;
+        this.numOfXCells = numOfXCells;
+        this.numOfYCells = numOfYCells;
         this.snake = snake;
-        this.frogs = frogs;
-        setSize(25 * m, 25 * m);
+        this.greenFrogs = greenFrogs;
+        this.redFrogs = redFrogs;
+        this.blueFrogs = blueFrogs;
+        score = 0;
+        playPressed = false;
+        stopPressed = false;
+        backgroundColor = Color.black;
+        gridColor = new Color(0, 153, 51, 100);
+        setSize(30 * numOfXCells, 30 * numOfYCells);
         setLocationRelativeTo(null);
         show();
     }
 
-    /** 
-     * x - X coordinate of current cell of snake;
-     * y - Y coordinate of current cell of snake;
-     * 
-     * width and height of each cell of field are being calculated for each cell of snake:
-     * jPanel1.getWidth() / numOfXCells;
-     * 
-     * calculations of oval start position, its width and height:
-     * offScrGraph.fillOval(
-     *  x + X offset from top left corner of current cell of field, 
-     *  y + Y offset from top left corner of current cell of field, 
-     *  width of current cell of field divided by some coefficient, 
-     *  height of current cell of field divided by some coefficient
-     * );
-    **/ 
-    public void drawSnake() {
+    /**
+     * Draws a snake.
+     * <p>
+     * <b>x</b> - <i>X</i> coordinate of current cell of snake;<br>
+     * <b>y</b> - <i>Y</i> coordinate of current cell of snake;
+     * <p>
+     * width and height of each appropriate cell of field are being calculated
+     * for each cell of snake:<br>
+     * <i>jPanel1.getWidth() / numOfXCells;</i>
+     * <p>
+     * calculations of oval start position, its width and height:<br>
+     * <i>offScrGraph.fillOval(<br>
+     * x + X offset from top left corner of current cell of field,<br>
+     * y + Y offset from top left corner of current cell of field,<br>
+     * width of current cell of field divided by some coefficient,<br>
+     * height of current cell of field divided by some coefficient<br> );
+     */
+    private void drawSnake() {
         offScrGraph.setColor(Color.yellow);
         //head
-        x = snake.get(0).getX() * jPanel1.getWidth() / numOfXCells;
-        y = snake.get(0).getY() * jPanel1.getHeight() / numOfYCells;
-        offScrGraph.fillOval(x+jPanel1.getWidth()/numOfXCells/4, y+jPanel1.getHeight()/numOfYCells/4, jPanel1.getWidth()/numOfXCells/2, jPanel1.getHeight()/numOfYCells/2);
+        int x = snake.xOfCell(0) * jPanel1.getWidth() / numOfXCells;
+        int y = snake.yOfCell(0) * jPanel1.getHeight() / numOfYCells;
+        offScrGraph.fillOval(x + jPanel1.getWidth() / numOfXCells / 4, y + jPanel1.getHeight() / numOfYCells / 4, jPanel1.getWidth() / numOfXCells / 2, jPanel1.getHeight() / numOfYCells / 2);
         //body
-        for (int i = 0; i < snake.size()-1; i++) {
-            x = snake.get(i).getX() * jPanel1.getWidth() / numOfXCells;
-            y = snake.get(i).getY() * jPanel1.getHeight() / numOfYCells;
-            offScrGraph.fillOval(x+jPanel1.getWidth()/numOfXCells/3, y+jPanel1.getHeight()/numOfYCells/3, jPanel1.getWidth()/numOfXCells/3, jPanel1.getHeight()/numOfYCells/3);
+        for (int i = 1; i < snake.size() - 1; i++) {
+            x = snake.xOfCell(i) * jPanel1.getWidth() / numOfXCells;
+            y = snake.yOfCell(i) * jPanel1.getHeight() / numOfYCells;
+            offScrGraph.fillOval(x + jPanel1.getWidth() / numOfXCells / 3, y + jPanel1.getHeight() / numOfYCells / 3, jPanel1.getWidth() / numOfXCells / 3, jPanel1.getHeight() / numOfYCells / 3);
         }
         //tail
-        x = snake.get(snake.size()-1).getX() * jPanel1.getWidth() / numOfXCells;
-        y = snake.get(snake.size()-1).getY() * jPanel1.getHeight() / numOfYCells;
-        offScrGraph.fillOval(x-2+jPanel1.getWidth()/numOfXCells/2, y-2+jPanel1.getHeight()/numOfYCells/2, 4, 4);
-        
+        x = snake.xOfCell(snake.size() - 1) * jPanel1.getWidth() / numOfXCells;
+        y = snake.yOfCell(snake.size() - 1) * jPanel1.getHeight() / numOfYCells;
+        offScrGraph.fillOval(x - 2 + jPanel1.getWidth() / numOfXCells / 2, y - 2 + jPanel1.getHeight() / numOfYCells / 2, 4, 4);
+
         jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
     }
 
-    public void drawFrogs() {
-        offScrGraph.setColor(Color.green);
-        for (Cell cell : frogs) {
-            x = cell.getX() * jPanel1.getWidth() / numOfXCells;
-            y = cell.getY() * jPanel1.getHeight() / numOfYCells;
-            offScrGraph.fillOval(x+jPanel1.getWidth()/numOfXCells/3, y+jPanel1.getHeight()/numOfYCells/3, jPanel1.getWidth()/numOfXCells/3, jPanel1.getHeight()/numOfYCells/3);
+    /**
+     * Erases a snake by filling its current position with background color,<br>
+     * so the snake could be drawn on its next move.
+     *
+     * @see #drawSnake
+     */
+    private void eraseSnake() {
+        offScrGraph.setColor(backgroundColor);
+        for (int i = 0; i < snake.size(); i++) {
+            int x = snake.xOfCell(i) * jPanel1.getWidth() / numOfXCells;
+            int y = snake.yOfCell(i) * jPanel1.getHeight() / numOfYCells;
+            offScrGraph.fillOval(x + jPanel1.getWidth() / numOfXCells / 4, y + jPanel1.getHeight() / numOfYCells / 4, jPanel1.getWidth() / numOfXCells / 2, jPanel1.getHeight() / numOfYCells / 2);
         }
         jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
     }
 
-    public void draw() {
+    /**
+     * Draws specified frogs family with appropriate color.
+     *
+     * @param frogs
+     */
+    private void drawFrogs(Frogs frogs) {
+        switch (frogs.type()) {
+            case "Green":
+                offScrGraph.setColor(Color.green);
+                break;
+            case "Red":
+                offScrGraph.setColor(Color.red);
+                break;
+            case "Blue":
+                offScrGraph.setColor(Color.blue);
+                break;
+            default:
+                break;
+        }
+        for (int i = 0; i < frogs.size(); i++) {
+            int x = frogs.xOfCell(i) * jPanel1.getWidth() / numOfXCells;
+            int y = frogs.yOfCell(i) * jPanel1.getHeight() / numOfYCells;
+            offScrGraph.fillOval(x + jPanel1.getWidth() / numOfXCells / 3, y + jPanel1.getHeight() / numOfYCells / 3, jPanel1.getWidth() / numOfXCells / 3, jPanel1.getHeight() / numOfYCells / 3);
+        }
+        jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
+    }
+
+    /**
+     * Erases specified frogs family by filling its current position with
+     * background color,<br>
+     * so the family could be drawn on its next move.
+     *
+     * @param frogs
+     * @see #drawFrogs(snakegame.Frogs)
+     */
+    private void eraseFrogs(Frogs frogs) {
+        offScrGraph.setColor(backgroundColor);
+        for (int i = 0; i < frogs.size(); i++) {
+            int x = frogs.xOfCell(i) * jPanel1.getWidth() / numOfXCells;
+            int y = frogs.yOfCell(i) * jPanel1.getHeight() / numOfYCells;
+            offScrGraph.fillOval(x + jPanel1.getWidth() / numOfXCells / 3, y + jPanel1.getHeight() / numOfYCells / 3, jPanel1.getWidth() / numOfXCells / 3, jPanel1.getHeight() / numOfYCells / 3);
+        }
+        jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
+    }
+
+    /**
+     * Draws a gameboard by filling a rectangle and drawing lines<br>
+     * with appropriate colors.
+     */
+    private void drawGrid() {
         //background
-        offScrGraph.setColor(jPanel1.getBackground());
+        offScrGraph.setColor(backgroundColor);
         offScrGraph.fillRect(0, 0, jPanel1.getWidth(), jPanel1.getHeight());
         //grid
         offScrGraph.setColor(gridColor);
-        for (i = 1; i < numOfXCells; i++) {
-            x = i * jPanel1.getWidth() / numOfXCells;
+        for (int i = 1; i < numOfXCells; i++) {
+            int x = i * jPanel1.getWidth() / numOfXCells;
             offScrGraph.drawLine(x, 0, x, jPanel1.getHeight());
         }
-        for (j = 1; j < numOfYCells; j++) {
-            y = j * jPanel1.getHeight() / numOfYCells;
+        for (int j = 1; j < numOfYCells; j++) {
+            int y = j * jPanel1.getHeight() / numOfYCells;
             offScrGraph.drawLine(0, y, jPanel1.getWidth(), y);
         }
-        
+
         jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
-        
-        drawSnake();
-        drawFrogs(); 
     }
 
-    public void drawGameOver() {
-        //background
-        offScrGraph.setColor(Color.lightGray);
-        offScrGraph.fillRect(0, 0, jPanel1.getWidth(), jPanel1.getHeight());
-        //text message
-        offScrGraph.setColor(Color.red);
-        offScrGraph.drawString("GAME OVER. YOUR SCORE: " + frogsEaten, jPanel1.getWidth()/8*2, jPanel1.getHeight()/2);
-        
-        jPanel1.getGraphics().drawImage(offScrImg, 0, 0, jPanel1);
-        
-        playPressed = false;
-        jButton1.setText("Play");
-        jLabel2.setText("0");
-        notifyObservers("PlayPressed");
-    }      
+    /**
+     * Updates current score each time a green or red frog is eaten.
+     *
+     * @param increase
+     */
+    private void drawScore(int increase) {
+        score = score + increase;
+        jLabel2.setText(String.valueOf(score));
+    }
 
-    //method is for testing, but it's too complex. to be fixed later!
-    public void checkCollisions() {
-        int snakeHeadX = snake.get(0).getX(), snakeHeadY = snake.get(0).getY();
-        for (Cell frogCell : frogs) {
-            if (snakeHeadX == frogCell.getX() & snakeHeadY == frogCell.getY()) {
-                //notifyObservers(frogCell.toString());
-                frogsEaten++;
-                jLabel2.setText(String.valueOf(frogsEaten));
-            }
+    /**
+     * Displays "Game Over" message dialog with game results<br>
+     * depending on event that happened.
+     *
+     * @param gameOverEvent
+     */
+    private void drawGameOverMessage(String gameOverEvent) {
+        notifyObservers("GameOver");
+
+        String gameOverMessage = "";
+        switch (gameOverEvent) {
+            case "SnakeAteItself":
+                gameOverMessage = "The snake ate itself.";
+                break;
+            case "BlueFrogIsEaten":
+                gameOverMessage = "The blue frog is eaten.";
+                break;
+            case "GameIsStopped":
+                gameOverMessage = "The game is stopped.";
+                break;
+            default:
+                break;
         }
+        gameOverMessage = gameOverMessage + " Your score: " + score + " point(s).";
+
+        JOptionPane.showMessageDialog(rootPane, gameOverMessage, "Game Over", JOptionPane.PLAIN_MESSAGE);
+
+        notifyObservers("StartNewGame");
     }
-    
+
+    /**
+     * Resets main variables and redraws all objects after last gameplay.
+     */
+    private void drawNewGame() {
+        playPressed = false;
+        stopPressed = false;
+        jButton1.setText("Play");
+        jButton2.setEnabled(false);
+        score = 0;
+        jLabel2.setText("0");
+        drawGrid();
+        drawSnake();
+        drawFrogs(greenFrogs);
+        drawFrogs(redFrogs);
+        drawFrogs(blueFrogs);
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -138,7 +228,7 @@ public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Obs
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Snake Game");
 
-        jPanel1.setBackground(new java.awt.Color(0, 102, 51));
+        jPanel1.setBackground(new java.awt.Color(0, 0, 0));
         jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jPanel1MouseClicked(evt);
@@ -169,6 +259,7 @@ public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Obs
         });
 
         jButton2.setText("Stop");
+        jButton2.setEnabled(false);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -209,30 +300,53 @@ public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Obs
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Redraws all objects if game window is being resized.
+     *
+     * @param evt
+     */
     private void jPanel1ComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jPanel1ComponentResized
         offScrImg = createImage(jPanel1.getWidth(), jPanel1.getHeight());
         offScrGraph = offScrImg.getGraphics();
-        draw();
+        drawGrid();
+        drawSnake();
+        drawFrogs(greenFrogs);
+        drawFrogs(redFrogs);
+        drawFrogs(blueFrogs);
     }//GEN-LAST:event_jPanel1ComponentResized
 
+    /**
+     * The "Play/Pause" button event handler.
+     *
+     * @param evt
+     */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         playPressed = !playPressed;
         if (playPressed) {
             jButton1.setText("Pause");
+            jButton2.setEnabled(true);
+            notifyObservers("PlayPressed");
         } else {
             jButton1.setText("Play");
+            notifyObservers("PausePressed");
         }
-        notifyObservers("PlayPressed");
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    /**
+     * The "Stop" button event handler.
+     *
+     * @param evt
+     */
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        playPressed = false;
-        frogsEaten = 0;
-        jButton1.setText("Play");
-        jLabel2.setText("0");
-        notifyObservers("PlayPressed");
+        stopPressed = true;
+        drawGameOverMessage("GameIsStopped");
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    /**
+     * The mouse buttons event handler.
+     *
+     * @param evt
+     */
     private void jPanel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseClicked
         if (SwingUtilities.isLeftMouseButton(evt)) {
             notifyObservers("LeftMouseButtonPressed");
@@ -248,7 +362,76 @@ public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Obs
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
-    
+
+    /**
+     * Updates the display depending on a message<br>
+     * received from the observable object.
+     *
+     * @param message
+     * @see SnakeGameBoard
+     */
+    @Override
+    public void update(String message) {
+        switch (message) {
+            case "EraseSnake":
+                eraseSnake();
+                break;
+            case "EraseGreenFrogs":
+                eraseFrogs(greenFrogs);
+                break;
+            case "EraseRedFrogs":
+                eraseFrogs(redFrogs);
+                break;
+            case "EraseBlueFrogs":
+                eraseFrogs(blueFrogs);
+                break;
+
+            case "SnakeMoved":
+                drawSnake();
+                break;
+            case "SnakeTurnedLeft":
+                drawSnake();
+                break;
+            case "SnakeTurnedRight":
+                drawSnake();
+                break;
+
+            case "GreenFrogsMoved":
+                drawFrogs(greenFrogs);
+                break;
+            case "RedFrogsMoved":
+                drawFrogs(redFrogs);
+                break;
+            case "BlueFrogsMoved":
+                drawFrogs(blueFrogs);
+                break;
+
+            case "SnakeAteItself":
+                drawSnake();
+                drawGameOverMessage(message);
+                break;
+            case "BlueFrogIsEaten":
+                drawSnake();
+                drawGameOverMessage(message);
+                break;
+            case "RedFrogIsEaten":
+                drawScore(2);
+                drawFrogs(redFrogs);
+                break;
+            case "GreenFrogIsEaten":
+                drawScore(1);
+                drawFrogs(greenFrogs);
+                break;
+
+            case "GameBoardReset":
+                drawNewGame();
+                break;
+
+            default:
+                break;
+        }
+    }
+
     @Override
     public void registerObserver(Observer o) {
         observers.add(o);
@@ -266,16 +449,4 @@ public class SnakeGameWindow extends javax.swing.JFrame implements Observer, Obs
         }
     }
 
-    @Override
-    public void update(String message) {
-        switch (message) {
-            case "BoundaryIsReached":
-                drawGameOver();
-                break;
-            default:
-                checkCollisions();
-                draw();
-                break;
-        }
-    }
 }
