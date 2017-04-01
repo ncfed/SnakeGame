@@ -75,7 +75,7 @@ public class SnakeGameBoard implements Observer, Observable {
      * @see Snake
      * @see #frogsMap
      */
-    private void checkCollisions() {
+    private void checkForCollisions() {
         int snakeHeadX = snake.xOfCell(0);
         int snakeHeadY = snake.yOfCell(0);
         for (int i = 1; i < snake.size(); i++) {
@@ -139,38 +139,38 @@ public class SnakeGameBoard implements Observer, Observable {
             case "MoveSnake":
                 notifyObservers("EraseSnake");
                 snake.move();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("SnakeMoved");
                 break;
             case "TurnSnakeLeft":
                 notifyObservers("EraseSnake");
                 snake.turnLeft();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("SnakeTurnedLeft");
                 break;
             case "TurnSnakeRight":
                 notifyObservers("EraseSnake");
                 snake.turnRight();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("SnakeTurnedRight");
                 break;
 
             case "MoveGreenFrogs":
                 notifyObservers("EraseGreenFrogs");
                 greenFrogs.move();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("GreenFrogsMoved");
                 break;
             case "MoveRedFrogs":
                 notifyObservers("EraseRedFrogs");
                 redFrogs.move();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("RedFrogsMoved");
                 break;
             case "MoveBlueFrogs":
                 notifyObservers("EraseBlueFrogs");
                 blueFrogs.move();
-                checkCollisions();
+                checkForCollisions();
                 notifyObservers("BlueFrogsMoved");
                 break;
 

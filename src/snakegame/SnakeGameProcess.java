@@ -8,7 +8,7 @@ import java.util.TimerTask;
 public class SnakeGameProcess implements Observer, Observable {
 
     private List<Observer> observers;
-    private boolean play, gameOver;
+    private boolean play;
     private int snakeSleepTime;
     private Timer timer;
     private TimerTask snakeTimerTask, greenFrogsTimerTask, redFrogsTimerTask, blueFrogsTimerTask;
@@ -16,7 +16,6 @@ public class SnakeGameProcess implements Observer, Observable {
     public SnakeGameProcess(int snakeSleepTime) {
         observers = new LinkedList<>();
         play = false;
-        gameOver = false;
         this.snakeSleepTime = snakeSleepTime;
         startGame();
     }
@@ -33,7 +32,7 @@ public class SnakeGameProcess implements Observer, Observable {
         snakeTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if (play & !gameOver) {
+                if (play) {
                     notifyObservers("MoveSnake");
                 }
             }
@@ -43,7 +42,7 @@ public class SnakeGameProcess implements Observer, Observable {
         greenFrogsTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if (play & !gameOver) {
+                if (play) {
                     notifyObservers("MoveGreenFrogs");
                 }
             }
@@ -53,7 +52,7 @@ public class SnakeGameProcess implements Observer, Observable {
         redFrogsTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if (play & !gameOver) {
+                if (play) {
                     notifyObservers("MoveRedFrogs");
                 }
             }
@@ -63,7 +62,7 @@ public class SnakeGameProcess implements Observer, Observable {
         blueFrogsTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if (play & !gameOver) {
+                if (play) {
                     notifyObservers("MoveBlueFrogs");
                 }
             }
@@ -95,10 +94,8 @@ public class SnakeGameProcess implements Observer, Observable {
                 break;
             case "GameOver":
                 play = false;
-                gameOver = true;
                 break;
             case "StartNewGame":
-                gameOver = false;
                 notifyObservers("ResetGameBoard");
                 break;
             default:
