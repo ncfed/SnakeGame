@@ -1,5 +1,7 @@
 # The Snake Game
 
+![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gameplay screenshot")
+
 ## Controls:
 *Left mouse button* - left turn  
 *Right mouse button* - right turn
