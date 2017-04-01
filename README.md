@@ -1,4 +1,4 @@
-# The Snake Game
+# :snake:The Snake Game:frog:
 
 ![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gameplay screenshot")
 
