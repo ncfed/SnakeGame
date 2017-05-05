@@ -3,12 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/SnakeGame.java</file>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/SnakeGameWindow.java</file>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/Frogs.java</file>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/SnakeGameBoard.java</file>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/Snake.java</file>
-            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/snakegame/SnakeGameProcess.java</file>
+            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/ru/game/snake/obj/Frog.java</file>
+            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/ru/game/snake/obj/Snake.java</file>
+            <file>file:/C:/Users/user/Documents/NetBeansProjects/SnakeGame/src/ru/game/snake/obj/GameObject.java</file>
         </group>
     </open-files>
 </project-private>
