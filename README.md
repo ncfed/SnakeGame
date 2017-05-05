@@ -1,6 +1,6 @@
 # :snake:The Snake Game:frog:
 
-![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gamepla screenshot")
+![Gameplay screenshot](https://github.com/ncfed/SnakeGame/blob/master/Screenshot.jpg "Gameplay screenshot")
 
 ## :video_game:Controls:
 *Left mouse button* - turn left  
